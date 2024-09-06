@@ -21,9 +21,9 @@
         quiz-depot (:*quiz-depot depots)
         session-depot (:*session-depot depots)]
 
-    (doseq [question questions]
+    #_(doseq [question questions]
       (quiz/send-question question-depot (-unqualify question)))
 
-    (doseq [quiz quizzes]
+    #_(doseq [quiz quizzes]
       (quiz/send-quiz {:quiz quiz-depot :session session-depot}
                       (-unqualify quiz)))))

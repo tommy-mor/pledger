@@ -4,6 +4,7 @@
    [com.rpl.rama.path :as path]
    [com.rpl.rama.test :as rtest]
    [dre.quiz.interface :as quiz]
+   [dre.pledge.interface :as pledge]
    [dre.session.interface :as session]
    [dre.user.interface :as user]))
 
@@ -15,12 +16,8 @@
 (defn -make-system [cluster]
   (fn [_]
     {:cluster cluster
-     :depots (merge (user/export-depots cluster)
-                    (quiz/export-depots cluster)
-                    (session/export-depots cluster))
-     :pstates (merge (user/export-pstates cluster)
-                     (quiz/export-pstates cluster)
-                     (session/export-pstates cluster))}))
+     :depots (merge (pledge/export-depots cluster))
+     :pstates (merge (pledge/export-pstates cluster))}))
 
 (defn -get-depot [key]
   (get-in system [:depots key]))
@@ -35,9 +32,7 @@
   (println "Start rama cluster...")
   (let [cluster (rtest/create-ipc)]
     (try
-      (-run-module cluster (user/get-user-module))
-      (-run-module cluster (quiz/get-quiz-module))
-      (-run-module cluster (session/get-session-module))
+      (-run-module cluster (pledge/get-pledge-module))
       (alter-var-root #'system (-make-system cluster))
       (println "Rama cluster started")
       :done

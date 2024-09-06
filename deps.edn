@@ -19,7 +19,9 @@
                  "components/quiz/resources"
                  "components/quiz/src"
                  "components/session/resources"
-                 "components/session/src"]
+                 "components/session/src"
+                 "components/pledge/src"
+                 "components/pledge/resources"]
 
    :extra-deps {;; Ui compiler
                 ;;com.hyperfiddle/electric {:mvn/version "v2-alpha-349-ge9996713"}

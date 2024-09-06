@@ -4,6 +4,7 @@
    [hyperfiddle.electric :as e]
    [hyperfiddle.electric-dom2 :as dom]
    [dre.web-ui.views.board :as board]
+   [dre.web-ui.views.pledger :as pledger]
    [dre.web-ui.views.login :as login]))
 
 (e/defn NotFound []
@@ -20,7 +21,5 @@
               routes/route-match match
               routes/route-name (some-> match :data :name)]
       (case routes/route-name
-        :login (login/Login. "login")
-        :signup (login/Login. "signup")
-        (:quizzes :quiz :session) (board/Board. routes/route-name routes/route-match)
+        :home (pledger/Pledger.)
         (NotFound.)))))

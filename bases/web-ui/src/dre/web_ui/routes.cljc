@@ -10,8 +10,7 @@
 
 (def router
   (r/router
-   [["/login" :login]
-    ["/signup" :signup]
+   [["/" :home]
     ["/quizzes" :quizzes]
     ["/quizzes/:id" :quiz]
     ["/sessions/:id" :session]]))
