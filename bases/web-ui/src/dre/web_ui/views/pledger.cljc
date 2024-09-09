@@ -7,12 +7,12 @@
    [dre.web-ui.views.quiz-list :as quiz-list]
    [dre.web-ui.views.quiz-item :as quiz-item]
    [dre.web-ui.views.quiz-session :as quiz-session]
+   #?(:clj [dre.web-ui.views.twilio :as twilio])
    #?(:clj [dre.server.rama :as rama])
    #?(:clj [com.rpl.rama :as r])
    #?(:clj [com.rpl.rama.path :as path])
    #?(:clj [dre.belt.interface :as belt])
-   #?(:cljs [dre.web-ui.routes :as routes])
-   [hato.client :as hc]))
+   #?(:cljs [dre.web-ui.routes :as routes])))
 
 #?(:clj
    (defn get-all-pledges [dirty]
@@ -21,6 +21,7 @@
 #?(:clj
    (defn get-pledge [pledge-id]
      (r/foreign-select-one (path/keypath pledge-id) (rama/-get-pstate :$$pledges) )))
+
 
 (def styles
   {:form/container (css :border :p-3)
@@ -88,7 +89,7 @@
                  (dom/text (:trigger-count pledge))))
        
        (let [!show-form (atom false) show-form (e/watch !show-form)
-             !phone-number (atom "") phone-number (e/watch !phone-number)]
+             !phone-number (atom "+1") phone-number (e/watch !phone-number)]
          (if show-form
            (dom/div
             (ui/input phone-number (e/fn [v] (reset! !phone-number v))
@@ -97,7 +98,7 @@
                                           :height "30px"
                                           :margin-top "10px"}
                                   :type "tel"}))
-            (ui/button-colored (e/fn [] (println "pressed"))
+            (ui/button-colored (e/fn [] (e/server (twilio/send-verification phone-number)))
                                (dom/props {:style {:width "60px"}})
                                (dom/text "submit")))
            (ui/button (e/fn [] (swap! !show-form not))
