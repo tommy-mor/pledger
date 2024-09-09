@@ -56,7 +56,9 @@
                 djblue/portal {:mvn/version "0.44.0"}
                 ;; Rama stuff
                 com.rpl/rama {:mvn/version "0.10.0"}
-                com.rpl/rama-helpers {:mvn/version "0.9.1"}}}
+                com.rpl/rama-helpers {:mvn/version "0.9.1"}
+
+                hato/hato {:mvn/version "1.0.0"}}}
 
   :test
   {:extra-paths ["bases/server/test"

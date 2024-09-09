@@ -11,7 +11,8 @@
    #?(:clj [com.rpl.rama :as r])
    #?(:clj [com.rpl.rama.path :as path])
    #?(:clj [dre.belt.interface :as belt])
-   #?(:cljs [dre.web-ui.routes :as routes])))
+   #?(:cljs [dre.web-ui.routes :as routes])
+   [hato.client :as hc]))
 
 #?(:clj
    (defn get-all-pledges [dirty]
