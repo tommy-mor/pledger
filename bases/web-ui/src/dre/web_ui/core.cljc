@@ -22,4 +22,5 @@
               routes/route-name (some-> match :data :name)]
       (case routes/route-name
         :home (pledger/Pledger.)
+        :pledge (pledger/Pledge-page. (some-> match :parameters :path :id))
         (NotFound.)))))

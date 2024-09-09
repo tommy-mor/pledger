@@ -19,14 +19,15 @@
   (let [s (r/stream-topology topo "pledge")]
     ;; Quizzes schema
     (r/declare-pstate s $$pledges {String (r/fixed-keys-schema {:title String
-                                                                :trigger-count Long})})
+                                                                :trigger-count Long
+                                                                :id String})})
     
     (r/<<sources s
                  ;; Question
                  (r/source> *pledge-depot :> {:keys [*id] :as *pledge})
                  (r/|hash *id)
                  (r/local-transform> [(path/keypath *id)
-                                      (path/termval (into {} (dissoc *pledge :id)))]
+                                      (path/termval (into {} *pledge))]
                                      $$pledges))))
 
 (def pledge-module-name (r/get-module-name PledgeModule))

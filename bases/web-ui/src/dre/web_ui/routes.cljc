@@ -11,9 +11,7 @@
 (def router
   (r/router
    [["/" :home]
-    ["/quizzes" :quizzes]
-    ["/quizzes/:id" :quiz]
-    ["/sessions/:id" :session]]))
+    ["/pledge/:id" :pledge]]))
 
 (e/def re-router
   (->> (m/observe
