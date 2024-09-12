@@ -1,6 +1,7 @@
 (ns dre.web-ui.views.twilio
   (:require [hato.client :as hc]
-            [ring.util.codec :as codec])
+            [ring.util.codec :as codec]
+            [com.rpl.specter :as s])
   (:import java.util.Base64))
 
 (defn encode [to-encode]
@@ -25,5 +26,11 @@
                    :body (codec/form-encode {:To phone-number
                                              :Code code})}))
   (reset! !done :done))
+
+(defn trim-whitespace [st]
+  (apply str (reverse (s/transform [(s/filterer #(Character/isWhitespace %))] s/NONE st))))
+
+(comment
+  (trim-whitespace "+1 123 456 7890"))
 
 

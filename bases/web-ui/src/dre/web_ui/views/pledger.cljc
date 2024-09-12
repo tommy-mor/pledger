@@ -9,6 +9,7 @@
    [dre.web-ui.views.quiz-session :as quiz-session]
    #?(:clj [dre.web-ui.views.twilio :as twilio])
    #?(:clj [dre.server.rama :as rama])
+   #?(:clj [dre.pledge.core :as pledge])
    #?(:clj [com.rpl.rama :as r])
    #?(:clj [com.rpl.rama.path :as path])
    #?(:clj [dre.belt.interface :as belt])
@@ -22,6 +23,20 @@
    (defn get-pledge [pledge-id]
      (r/foreign-select-one (path/keypath pledge-id) (rama/-get-pstate :$$pledges) )))
 
+#?(:clj
+   (defn post-signature [id phone-number name]
+     (r/foreign-append! (rama/-get-depot :*signature-depot)
+                        (pledge/->Signature id (twilio/trim-whitespace phone-number) name))))
+
+#?(:clj
+   (defn get-signatures [pledge-id]
+     #_ (r/foreign-select-one (path/keypath pledge-id) (rama/-get-pstate :$$pledge->signatures))
+     (belt/make-reactive-query (path/keypath pledge-id) (rama/-get-pstate :$$pledge->signatures))))
+
+#?(:clj
+   (defn get-count [pledge-id]
+     (belt/make-reactive-query [(path/keypath pledge-id) (path/view count)]
+                               (rama/-get-pstate :$$pledge->numbers))))
 
 (def styles
   {:form/container (css :border :p-3)
@@ -87,6 +102,10 @@
                 (dom/div
                  (dom/props {:style {:float "right"}})
                  (dom/text (:trigger-count pledge))))
+
+       (dom/text (e/server (new (get-signatures pledge-id) )) )
+       (dom/br)
+       (dom/text (e/server (new (get-count pledge-id) )) )
        
        
        (e/server
@@ -94,7 +113,14 @@
           (e/client
            (let [!phone-number (atom "+1") phone-number (e/watch !phone-number)]
              (case show-form
-               :done (dom/div (dom/text "done"))
+               :done (let [!name (atom "") name (e/watch !name)]
+                       (dom/div
+                        (ui/input name (e/fn [v] (reset! !name v))
+                                  (dom/props {:placeholder "type your name" :style {:width "340px" :height "30px" :margin-top "10px"} :type "tel"}))
+                        (ui/button-colored (e/fn [] (e/server (post-signature pledge-id phone-number name)))
+                                           
+                                           (dom/props {:style {:width "60px"}})
+                                           (dom/text "submit"))))
                
                :confirm
                (let [!confirmation (atom "") confirmation (e/watch !confirmation)]
