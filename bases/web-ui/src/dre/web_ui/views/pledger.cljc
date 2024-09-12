@@ -88,25 +88,43 @@
                  (dom/props {:style {:float "right"}})
                  (dom/text (:trigger-count pledge))))
        
-       (let [!show-form (atom false) show-form (e/watch !show-form)
-             !phone-number (atom "+1") phone-number (e/watch !phone-number)]
-         (if show-form
-           (dom/div
-            (ui/input phone-number (e/fn [v] (reset! !phone-number v))
-                      (dom/props {:placeholder "phone number"
-                                  :style {:width "340px"
-                                          :height "30px"
-                                          :margin-top "10px"}
-                                  :type "tel"}))
-            (ui/button-colored (e/fn [] (e/server (twilio/send-verification phone-number)))
-                               (dom/props {:style {:width "60px"}})
-                               (dom/text "submit")))
-           (ui/button (e/fn [] (swap! !show-form not))
-                      (dom/props {:style {:background "lightgray"
-                                          :width "400px"
-                                          :height "30px"
-                                          :margin-top "10px"}})
-                      (dom/text "sign up")))))))))
+       
+       (e/server
+        (let [!show-form (e/server (atom :sign-up)) show-form (e/watch !show-form)]
+          (e/client
+           (let [!phone-number (atom "+1") phone-number (e/watch !phone-number)]
+             (case show-form
+               :done (dom/div (dom/text "done"))
+               
+               :confirm
+               (let [!confirmation (atom "") confirmation (e/watch !confirmation)]
+                 (dom/div
+                  (ui/input confirmation (e/fn [v] (reset! !confirmation v))
+                            (dom/props {:placeholder "confirmation code" :style {:width "340px" :height "30px" :margin-top "10px"} :type "tel"}))
+                  (ui/button-colored (e/fn [] (e/server (twilio/send-confirmation phone-number confirmation !show-form)))
+                                     
+                                     (dom/props {:style {:width "60px"}})
+                                     (dom/text "submit"))))
+               
+               :form
+               (dom/div
+                (ui/input phone-number (e/fn [v] (reset! !phone-number v))
+                          (dom/props {:placeholder "phone number"
+                                      :style {:width "340px"
+                                              :height "30px"
+                                              :margin-top "10px"}
+                                      :type "tel"}))
+                (ui/button-colored (e/fn [] (e/server (twilio/send-verification phone-number !show-form)))
+                                   
+                                   (dom/props {:style {:width "60px"}})
+                                   (dom/text "submit")))
+               :sign-up
+               (ui/button (e/fn [] (e/server (reset! !show-form :form)))
+                          (dom/props {:style {:background "lightgray"
+                                              :width "400px"
+                                              :height "30px"
+                                              :margin-top "10px"}})
+                          (dom/text "sign up"))))))))))))
 
 (e/defn Pledger []
   (e/server

@@ -12,10 +12,18 @@
                                                           (-> "secrets.edn" slurp read-string :twilio/auth-token))))
                    "Content-type" "application/x-www-form-urlencoded"})
 
-(defn send-verification [phone-number]
+(defn send-verification [phone-number !done]
   (hc/post (str "https://verify.twilio.com/v2/Services/" (-> "secrets.edn" slurp read-string :twilio/service-id) "/Verifications")
            {:headers auth-headers
             :body (codec/form-encode {:To phone-number
-                                      :Channel "sms"})}))
+                                      :Channel "sms"})})
+  (reset! !done :confirm))
+
+(defn send-confirmation [phone-number code !done]
+  (def r (hc/post (str "https://verify.twilio.com/v2/Services/" (-> "secrets.edn" slurp read-string :twilio/service-id) "/VerificationCheck")
+                  {:headers auth-headers
+                   :body (codec/form-encode {:To phone-number
+                                             :Code code})}))
+  (reset! !done :done))
 
 
