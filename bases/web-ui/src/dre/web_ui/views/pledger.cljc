@@ -90,7 +90,8 @@
 
 (e/defn Pledge-page [pledge-id]
   (e/server
-   (let [pledge (e/server (get-pledge pledge-id))]
+   (let [pledge (e/server (get-pledge pledge-id))
+         sig-count (e/server (new (get-count pledge-id) ))]
      (e/client
       (dom/div
        (dom/props {:class (styles :pledge/container-full)})
@@ -99,19 +100,25 @@
        (dom/div (dom/props {:style {:background "lightgray"
                                     :width "400px"
                                     :height "30px"}})
+                (dom/div (dom/props {:style {:background "darkseagreen"
+                                             :height "100%"
+                                             :width (str (* 100 (/ sig-count
+                                                                   (:trigger-count pledge))) "%")}}))
+                (dom/div
+                 (dom/props {:style {:float "left"}})
+                 (dom/text sig-count))
                 (dom/div
                  (dom/props {:style {:float "right"}})
                  (dom/text (:trigger-count pledge))))
-
-       (dom/text (e/server (new (get-signatures pledge-id) )) )
        (dom/br)
-       (dom/text (e/server (new (get-count pledge-id) )) )
-       
-       
+
+       (dom/ol (e/for-by identity [nme (e/server (new (get-signatures pledge-id) ))]
+                         (dom/li (dom/text (:name nme)))))
        (e/server
         (let [!show-form (e/server (atom :sign-up)) show-form (e/watch !show-form)]
           (e/client
-           (let [!phone-number (atom "+1") phone-number (e/watch !phone-number)]
+           (let [!phone-number (atom "+1") phone-number (e/watch !phone-number)
+                 !confirmation-id (atom nil) confirmation-id (e/watch !confirmation-id)]
              (case show-form
                :done (let [!name (atom "") name (e/watch !name)]
                        (dom/div
@@ -127,7 +134,7 @@
                  (dom/div
                   (ui/input confirmation (e/fn [v] (reset! !confirmation v))
                             (dom/props {:placeholder "confirmation code" :style {:width "340px" :height "30px" :margin-top "10px"} :type "tel"}))
-                  (ui/button-colored (e/fn [] (e/server (twilio/send-confirmation phone-number confirmation !show-form)))
+                  (ui/button-colored (e/fn [] (e/server (twilio/send-confirmation confirmation-id phone-number confirmation !show-form)))
                                      
                                      (dom/props {:style {:width "60px"}})
                                      (dom/text "submit"))))
@@ -140,7 +147,8 @@
                                               :height "30px"
                                               :margin-top "10px"}
                                       :type "tel"}))
-                (ui/button-colored (e/fn [] (e/server (twilio/send-verification phone-number !show-form)))
+                (ui/button-colored (e/fn [] (e/server (let [id (twilio/send-verification phone-number !show-form)]
+                                                        (e/client (reset! !confirmation-id id)))))
                                    
                                    (dom/props {:style {:width "60px"}})
                                    (dom/text "submit")))
